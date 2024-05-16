@@ -11,6 +11,9 @@ importers:
       preact:
         specifier: ^10.19.6
         version: 10.22.0
+      preact-router:
+        specifier: ^4.1.2
+        version: 4.1.2(preact@10.22.0)
     devDependencies:
       '@eslint/js':
         specifier: ^9.2.0
@@ -1355,6 +1358,11 @@ packages:
   postcss@8.4.38:
     resolution: {integrity: sha512-Wglpdk03BSfXkHoQa3b/oulrotAkwrlLDRSOb9D0bN86FdRyE9lppSp33aHNPgBa0JKCoB+drFLZkQoRRYae5A==}
     engines: {node: ^10 || ^12 || >=14}
+
+  preact-router@4.1.2:
+    resolution: {integrity: sha512-uICUaUFYh+XQ+6vZtQn1q+X6rSqwq+zorWOCLWPF5FAsQh3EJ+RsDQ9Ee+fjk545YWQHfUxhrBAaemfxEnMOUg==}
+    peerDependencies:
+      preact: '>=10'
 
   preact@10.22.0:
     resolution: {integrity: sha512-RRurnSjJPj4rp5K6XoP45Ui33ncb7e4H7WiOHVpjbkvqvA3U+N8Z6Qbo0AE6leGYBV66n8EhEaFixvIu3SkxFw==}
@@ -3099,6 +3107,10 @@ snapshots:
       nanoid: 3.3.7
       picocolors: 1.0.1
       source-map-js: 1.2.0
+
+  preact-router@4.1.2(preact@10.22.0):
+    dependencies:
+      preact: 10.22.0
 
   preact@10.22.0: {}
 
