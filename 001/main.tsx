@@ -1,11 +1,16 @@
-import { h, render } from "preact";
+import { h, render, Fragment } from "preact";
 import "./index.css";
+import ThreeAppContent from "./ThreeApp";
 
 const App = () => (
-  <div>
-    <h1>WebGL School 2024 Homework 001</h1>
-    <p>Let's get started!</p>
-  </div>
+  <>
+    <div class="back-to-home-container">
+      <a class="back-to-home-link" href="../">
+        {"← Back to Home"}
+      </a>
+    </div>
+    <ThreeAppContent />
+  </>
 );
 
 render(<App />, document.getElementById("#app")!);
