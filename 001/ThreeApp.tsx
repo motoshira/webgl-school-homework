@@ -4,22 +4,31 @@ import { useEffect, useRef } from "preact/hooks";
 
 class CubeParams {
   time: number;
-  speed: Float32Array;
-  rotationSpeed: Float32Array;
-  constructor() {
-    this.reset();
+  speed: number;
+  rotationSpeed: THREE.Vector3;
+  constructor() {}
+  reset(cube: THREE.Mesh) {
+    const v = Math.random() * 0.4 + 0.1;
+    this.speed = v;
+    this.rotationSpeed = new THREE.Vector3(
+      Math.random() * 0.3,
+      Math.random() * 0.3,
+      Math.random() * 0.3,
+    );
+    const r = 4 + Math.random() * 10;
+    const theta = Math.random() * 2 * Math.PI;
+    cube.position.x = r * Math.cos(theta);
+    cube.position.y = r * Math.sin(theta);
+    cube.position.z = 0.0;
   }
-  reset() {
-    this.speed = new Float32Array([
-      Math.random() * 0.2 - 0.1,
-      Math.random() * 0.2 - 0.1,
-      Math.random() * 1.0,
-    ]);
-    this.rotationSpeed = new Float32Array([
-      Math.random() * 0.3,
-      Math.random() * 0.3,
-      Math.random() * 0.3,
-    ]);
+  updateCube(cube: THREE.Mesh) {
+    cube.position.z += this.speed;
+    cube.rotation.x += this.rotationSpeed.x;
+    cube.rotation.y += this.rotationSpeed.y;
+    cube.rotation.z += this.rotationSpeed.z;
+    if (cube.position.z > 110.0) {
+      this.reset(cube);
+    }
   }
 }
 
@@ -28,7 +37,7 @@ class ThreeAppRenderer {
     fovy: 60,
     aspect: window.innerWidth / window.innerHeight,
     near: 0.1,
-    far: 110.0,
+    far: 100.0,
     position: new THREE.Vector3(0.0, 0.0, 100.0),
     lookAt: new THREE.Vector3(0.0, 0.0, 0.0),
   };
@@ -46,7 +55,7 @@ class ThreeAppRenderer {
     color: 0x3399ff,
   };
   static CUBE_PARAM = {
-    amount: 100,
+    amount: 300,
   };
 
   renderer: THREE.WebGLRenderer;
@@ -82,6 +91,7 @@ class ThreeAppRenderer {
     );
     this.camera.position.copy(ThreeAppRenderer.CAMERA_PARAM.position);
     this.camera.lookAt(ThreeAppRenderer.CAMERA_PARAM.lookAt);
+
     // Directional Light
     this.directionalLight = new THREE.DirectionalLight(
       ThreeAppRenderer.DIRECTIONAL_LIGHT_PARAM.color,
@@ -102,11 +112,9 @@ class ThreeAppRenderer {
     this.cubeParams = [];
     for (let i = 0; i < ThreeAppRenderer.CUBE_PARAM.amount; ++i) {
       const cube = new THREE.Mesh(cubeGeometry, this.material);
-      cube.position.x = 0;
-      cube.position.y = 0;
-      cube.position.z = 0.0;
       const params = new CubeParams();
       this.cubeParams.push(params);
+      params.reset(cube);
       this.cubes.push(cube);
       this.scene.add(cube);
     }
@@ -131,23 +139,12 @@ class ThreeAppRenderer {
     if (!this.inRenderLoop) {
       return;
     }
+    this.camera.rotateZ(0.01);
 
     for (let i = 0; i < ThreeAppRenderer.CUBE_PARAM.amount; ++i) {
       const cube = this.cubes[i];
       const params = this.cubeParams[i];
-      cube.position.x += params.speed[0];
-      cube.position.y += params.speed[1];
-      cube.position.z += params.speed[2];
-      cube.rotation.x += params.rotationSpeed[0];
-      cube.rotation.y += params.rotationSpeed[1];
-      cube.rotation.z += params.rotationSpeed[2];
-      if (cube.position.z > 110.0) {
-        // reset
-        cube.position.x = 0.0;
-        cube.position.y = 0.0;
-        cube.position.z = 0.0;
-        this.cubeParams[i].reset();
-      }
+      params.updateCube(cube);
     }
 
     this.renderer.render(this.scene, this.camera);
