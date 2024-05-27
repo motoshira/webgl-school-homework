@@ -1,6 +1,5 @@
 # WebGL School Homework
 
-WebGLスクール2024の課題をホストしたホームページです。
-(TODO URL)
+[WebGLスクール第11期](https://webgl.souhonzan.org/entry/?v=2635)の課題です。
 
-test
+https://main.d29mqqgyf3frw5.amplifyapp.com/
