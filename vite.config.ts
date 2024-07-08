@@ -15,6 +15,7 @@ export default defineConfig({
       input: {
         main: resolve(root, "index.html"),
         "001": resolve(root, "001", "index.html"),
+        "005": resolve(root, "005", "index.html"),
       },
     },
   },
