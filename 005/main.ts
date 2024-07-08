@@ -1,5 +1,7 @@
 // モジュールを読み込み
 import { WebGLUtility } from "../lib/webgl.js";
+import VSSource from "./main.vert";
+import FSSource from "./main.frag";
 
 // ドキュメントの読み込みが完了したら実行されるようイベントを設定する
 window.addEventListener(
@@ -69,8 +71,8 @@ class App {
         reject(error);
       } else {
         // まずシェーダのソースコードを読み込む
-        const VSSource = await WebGLUtility.loadFile("./main.vert");
-        const FSSource = await WebGLUtility.loadFile("./main.frag");
+        /* const VSSource = await WebGLUtility.loadFile("./main.vert");
+         * const FSSource = await WebGLUtility.loadFile("./main.frag");  */
         // 無事に読み込めたらシェーダオブジェクトの実体を生成する
         const vertexShader = WebGLUtility.createShaderObject(
           gl,
