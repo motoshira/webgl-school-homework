@@ -3,6 +3,8 @@ import { Vec3, Mat4 } from "../lib/math.js";
 import { WebGLGeometry } from "../lib/geometry.js";
 import { WebGLOrbitCamera } from "../lib/camera.js";
 import { Pane } from "../lib/tweakpane-4.0.3.min.js";
+import VSSource from "./main.vert";
+import FSSource from "./main.frag";
 
 window.addEventListener(
   "DOMContentLoaded",
@@ -149,9 +151,6 @@ class App {
         const error = new Error("not initialized");
         reject(error);
       } else {
-        // シェーダのソースコードを読み込みシェーダとプログラムオブジェクトを生成する
-        const VSSource = await WebGLUtility.loadFile("./main.vert");
-        const FSSource = await WebGLUtility.loadFile("./main.frag");
         const vertexShader = WebGLUtility.createShaderObject(
           gl,
           VSSource,
