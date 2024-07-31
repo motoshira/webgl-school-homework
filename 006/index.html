@@ -19,16 +19,23 @@
       }
       .home-link {
         position: absolute;
+        padding: 8px;
         top: 10px;
         left: 10px;
         color: #000;
-        background-color: #f1f1f1;
+        background-color: #fff;
+        opacity: 0.6;
+        border-radius: 4px;
+        text-decoration: none;
+      }
+      .home-link:hover {
+        opacity: 0.8;
       }
     </style>
     <script src="./script.js" type="module"></script>
   </head>
   <body>
     <canvas id="webgl-canvas"></canvas>
-    <a class="home-link" href="/index.html">Back to Home</a>
+    <a class="home-link" href="/index.html">←Back to home</a>
   </body>
 </html>
