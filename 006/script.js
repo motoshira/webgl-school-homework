@@ -21,7 +21,7 @@ window.addEventListener(
     const parameter = {
       culling: true,
       depthTest: true,
-      rotation: true,
+      rotation: false,
     };
     // バックフェイスカリングの有効・無効
     pane.addBinding(parameter, "culling").on("change", (v) => {
