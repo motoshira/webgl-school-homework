@@ -10,7 +10,7 @@ varying vec3 vNormal;
 void main() {
   // 法線
 	vNormal = normalize((normalMatrix * vec4(normal, 0.0)).xyz);
-	// カラーはそのまま渡す (線形補完される)
+	// カラーはそのまま渡す
 	vColor = color;
   // MVP 行列と頂点座標を乗算してから出力する
   gl_Position = mvpMatrix * vec4(position, 1.0);
