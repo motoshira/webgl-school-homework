@@ -12,6 +12,30 @@ window.addEventListener(
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
+class InertialScrollManager {
+  static SPEED_FACTOR = 0.5;
+  static DIST_THRESHOLD = 0.01;
+  targetX;
+  x;
+  lastTime;
+  constructor(initX) {
+    this.targetX = initX;
+    this.x = initX;
+  }
+  update(newX, nextTime) {
+    const elapsed = nextTime - this.lastTime;
+    const speed = (newX - this.x) / elapsed;
+    this.targetX += speed;
+    const nextX =
+      this.x + (this.targetX - this.x) * InertialScrollManager.SPEED_FACTOR;
+    this.x =
+      Math.abs(this.x - nextX) < InertialScrollManager.DIST_THRESHOLD
+        ? this.x
+        : nextX;
+    this.lastTime = nextTime;
+  }
+}
+
 class ThreeApp {
   static CAMERA_PARAM = {
     fovy: 60,
@@ -128,42 +152,12 @@ class ThreeApp {
     this.isKeyDown = false;
 
     window.addEventListener(
-      "keydown",
+      "drag",
       (e) => {
-        switch (e.key) {
-          case " ":
-            this.isKeyDown = true;
-            break;
-          default:
-            break;
-        }
+        // TODO update inertial scroll manager
       },
       false,
     );
-    window.addEventListener(
-      "keyup",
-      (_) => {
-        this.isKeyDown = false;
-      },
-      false,
-    );
-
-    window.addEventListener(
-      "mousedown",
-      (_) => {
-        this.isTouched = true;
-      },
-      false,
-    );
-    window.addEventListener(
-      "mouseup",
-      (e) => {
-        // e.preventDefault();
-        this.isTouched = false;
-      },
-      false,
-    );
-
     window.addEventListener(
       "resize",
       () => {
