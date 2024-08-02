@@ -10,6 +10,8 @@ window.addEventListener(
   false,
 );
 
+const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
 class ThreeApp {
   static CAMERA_PARAM = {
     fovy: 60,
@@ -29,15 +31,18 @@ class ThreeApp {
     intensity: 1.0,
   };
   static MATERIAL_PARAM = {
-    color: 0xdddddd,
+    color: 0xaa0000,
   };
-  static CIRCLE_OBJECT_PARAM = {
-    ballRadius: 0.3,
-    ballAmount: 30,
-    circleRadius: 4.5,
-    rotationAcceleration: 0.001,
-    maxRotationSpeed: 0.1,
-    shakeHeadInterval: 10.0,
+  static SLICE_PARAM = {
+    width: 1.0,
+    height: 2.0,
+    amount: 1000,
+    minX: -100.0,
+    maxX: 100.0,
+  };
+  static INERTIAL_SCROLL_PARAMS = {
+    speedFactor: 0.5,
+    lowerLimit: 0.01,
   };
 
   renderer;
@@ -45,13 +50,16 @@ class ThreeApp {
   camera;
   startTime;
   ambientLight;
-  rotationSpeed = 0;
+
+  planteGeometry;
+
   material;
   sphereGeometry;
   sphereArray;
   axesHelper;
   isKeyDown;
   isTouched;
+  scrollX = 0.0;
 
   constructor(wrapper) {
     const color = new THREE.Color(ThreeApp.RENDERER_PARAM.clearColor);
@@ -65,12 +73,14 @@ class ThreeApp {
 
     this.scene = new THREE.Scene();
 
-    this.camera = new THREE.PerspectiveCamera(
-      ThreeApp.CAMERA_PARAM.fovy,
-      ThreeApp.CAMERA_PARAM.aspect,
-      ThreeApp.CAMERA_PARAM.near,
-      ThreeApp.CAMERA_PARAM.far,
-    );
+    this.camera = new THREE.OrthographicCamera(-10.0, 10.0, 10.0, -10.0);
+
+    /* this.camera = new THREE.PerspectiveCamera(
+     *   ThreeApp.CAMERA_PARAM.fovy,
+     *   ThreeApp.CAMERA_PARAM.aspect,
+     *   ThreeApp.CAMERA_PARAM.near,
+     *   ThreeApp.CAMERA_PARAM.far,
+     * ); */
     this.camera.position.copy(ThreeApp.CAMERA_PARAM.position);
     this.camera.lookAt(ThreeApp.CAMERA_PARAM.lookAt);
 
@@ -82,23 +92,33 @@ class ThreeApp {
 
     this.material = new THREE.MeshPhongMaterial(ThreeApp.MATERIAL_PARAM);
 
-    this.group = new THREE.Group();
-    this.scene.add(this.group);
-
-    this.sphereGeometry = new THREE.SphereGeometry(
-      ThreeApp.CIRCLE_OBJECT_PARAM.ballRadius,
+    /* this.group = new THREE.Group();
+     * this.scene.add(this.group);
+     */
+    this.planteGeometry = new THREE.PlaneGeometry(
+      ThreeApp.SLICE_PARAM.width,
+      ThreeApp.SLICE_PARAM.height,
     );
-    this.speres = [];
-    for (let i = 0; i < ThreeApp.CIRCLE_OBJECT_PARAM.ballAmount; ++i) {
-      const sphere = new THREE.Mesh(this.sphereGeometry, this.material);
-      const theta =
-        Math.PI * 2.0 * (i / ThreeApp.CIRCLE_OBJECT_PARAM.ballAmount);
-      const x = ThreeApp.CIRCLE_OBJECT_PARAM.circleRadius * Math.cos(theta);
-      const y = ThreeApp.CIRCLE_OBJECT_PARAM.circleRadius * Math.sin(theta);
-      sphere.position.x = x;
-      sphere.position.y = y;
-      sphere.position.z = 0;
-      this.group.add(sphere);
+
+    const texture = new THREE.TextureLoader().load("./(_˘ω˘).png");
+    this.slices = [];
+    for (let i = 0; i < ThreeApp.SLICE_PARAM.amount; ++i) {
+      const material = new THREE.MeshBasicMaterial({
+        // TODO add texture
+        map: texture,
+        // transparent: true,
+      });
+      const slice = new THREE.Mesh(this.planteGeometry, material);
+      const { minX, maxX, amount } = ThreeApp.SLICE_PARAM;
+      const x = minX + (maxX - minX) * (i / (amount - 1));
+      // -2.0 〜 2.0
+      const theta = clamp(-x, -1.0, 1.0) * 1.0 * 0.4 * Math.PI;
+      // const theta = Math.PI / 4;
+      slice.position.x = x;
+      slice.position.y = 0;
+      slice.position.z = 0;
+      slice.rotation.set(0, theta, 0);
+      this.scene.add(slice);
     }
 
     // this のバインド
@@ -148,7 +168,7 @@ class ThreeApp {
       "resize",
       () => {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.camera.aspect = window.innerWidth / window.innerHeight;
+        // this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
       },
       false,
@@ -159,23 +179,17 @@ class ThreeApp {
   render() {
     requestAnimationFrame(this.render);
 
-    this.rotationSpeed +=
-      ThreeApp.CIRCLE_OBJECT_PARAM.rotationAcceleration *
-      (this.isTouched || this.isKeyDown ? 1 : -1);
-
-    this.rotationSpeed = Math.min(
-      Math.max(this.rotationSpeed, 0.0),
-      ThreeApp.CIRCLE_OBJECT_PARAM.maxRotationSpeed,
-    );
-
-    this.group.rotation.z += this.rotationSpeed;
-
     const currentTime = performance.now();
     const elapsed = (currentTime - this.startTime) / 1000.0;
-    const { shakeHeadInterval } = ThreeApp.CIRCLE_OBJECT_PARAM;
-    this.group.rotation.y = Math.sin(
-      Math.PI * 2 * (elapsed / shakeHeadInterval),
-    );
+    // const { shakeHeadInterval } = ThreeApp.CIRCLE_OBJECT_PARAM;
+    /* this.group.rotation.y = Math.sin(
+     *   Math.PI * 2 * (elapsed / shakeHeadInterval),
+     * ); */
+    // TODO update scrollX
+
+    // TODO update x
+    // TODO update all slices (position.x and rotation.y)
+
     this.renderer.render(this.scene, this.camera);
   }
 }
