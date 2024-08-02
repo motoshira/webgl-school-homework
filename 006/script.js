@@ -215,7 +215,7 @@ class App {
     // uniform location の取得
     this.uniformLocation = {
       mvpMatrix: gl.getUniformLocation(this.program, "mvpMatrix"),
-      normalMatrix: gl.getUniformLocation(this.program, "normalMatrix"), // 法線変換行列 @@@
+      normalMatrix: gl.getUniformLocation(this.program, "normalMatrix"), // 法線変換行列
     };
   }
 
@@ -284,7 +284,7 @@ class App {
     const far = 10.0;
     const p = Mat4.perspective(fovy, aspect, near, far);
 
-    // 行列を乗算して MVP 行列を生成する（掛ける順序に注意）
+    // 行列を乗算して MVP 行列を生成する
     const vp = Mat4.multiply(p, v);
     const mvp = Mat4.multiply(vp, m);
 
