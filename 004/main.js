@@ -22,10 +22,10 @@ class InertialScrollManager {
     this.targetX = initX;
     this.x = initX;
   }
-  update(newX, nextTime) {
-    const elapsed = nextTime - this.lastTime;
-    const speed = (newX - this.x) / elapsed;
-    this.targetX += speed;
+  update(diff, nextTime) {
+    /* const elapsed = nextTime - this.lastTime;
+     * const speed = (newX - this.x) / elapsed; */
+    this.targetX += diff;
     const nextX =
       this.x + (this.targetX - this.x) * InertialScrollManager.SPEED_FACTOR;
     this.x =
