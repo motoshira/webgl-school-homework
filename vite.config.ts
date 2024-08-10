@@ -19,6 +19,7 @@ export default defineConfig({
         "002": resolve(root, "002", "index.html"),
         "005": resolve(root, "005", "index.html"),
         "006": resolve(root, "006", "index.html"),
+        "007": resolve(root, "007", "index.html"),
       },
     },
   },
