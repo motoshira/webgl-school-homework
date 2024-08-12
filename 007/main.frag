@@ -8,8 +8,8 @@ uniform sampler2D texture1;
 uniform vec2 originalImageSize1;
 uniform vec2 texSize1;
 
-// TODO object-fit: contain; っぽくする
-// TODO 2つの画像をcomposite -> transition
+// object-fit: contain; っぽくする
+// 2つの画像をrippleっぽくtransitionさせる
 
 const float PI = 3.14159265359;
 const vec2 CENTER = vec2(0.5);

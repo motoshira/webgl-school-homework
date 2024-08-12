@@ -210,7 +210,6 @@ class App {
     gl.linkProgram(program);
     gl.deleteShader(vertexShader);
     gl.deleteShader(fragmentShader);
-    // リンク後のステータスを確認し問題なければプログラムオブジェクトを返す
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
       throw new Error(gl.getProgramInfoLog(program)!);
     }
@@ -220,7 +219,6 @@ class App {
 
   setupGeometry() {
     const gl = this.gl;
-    // TODO create plane vbo
     const [sy, sx, gy, gx] = [-1, -1, 1, 1];
     const cs0 = [
       sx,
