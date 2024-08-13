@@ -1,14 +1,14 @@
 import { WebGLUtility } from "../lib/webgl.js";
 import VSSource from "./main.vert";
 import FSSource from "./main.frag";
-import Image1 from "./assets/001.jpg";
-import Image2 from "./assets/002.jpg";
-import Image3 from "./assets/003.jpg";
-import Image4 from "./assets/004.jpg";
-import Image5 from "./assets/005.jpg";
-import Image6 from "./assets/006.jpg";
-import Image7 from "./assets/007.jpg";
-import Image8 from "./assets/008.jpg";
+import Image1 from "./assets/001.webp";
+import Image2 from "./assets/002.webp";
+import Image3 from "./assets/003.webp";
+import Image4 from "./assets/004.webp";
+import Image5 from "./assets/005.webp";
+import Image6 from "./assets/006.webp";
+import Image7 from "./assets/007.webp";
+import Image8 from "./assets/008.webp";
 
 class Transition {
   static DURATION = 300.0;
