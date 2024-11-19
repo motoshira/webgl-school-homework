@@ -412,7 +412,7 @@ class App {
     gl.bindTexture(gl.TEXTURE_2D, texture);
 
     gl.useProgram(this.blurProgram);
-    gl.uniform1i(this.uniformLocation.gaussian, 0);
+    gl.uniform1i(this.uniformLocation.gaussian, 1);
     gl.uniform1i(this.uniformLocation.horizontal, horizontal ? 1 : 0);
     gl.uniform1fv(this.uniformLocation.weight, this.weight);
     gl.uniform1i(this.uniformLocation.texture0, 0);
