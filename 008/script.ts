@@ -395,20 +395,24 @@ class App {
 
   renderLoop() {
     this.setupWeight();
-    this.render(true, true);
-    this.render(false, false);
+    this.render(this.bgTexture, true, true);
+    this.render(this.tempTexture, false, false);
     requestAnimationFrame(this.renderLoop);
   }
 
-  render(bindToRenderTarget: boolean, horizontal: boolean) {
+  render(
+    texture: WebGLTexture,
+    bindToRenderTarget: boolean,
+    horizontal: boolean,
+  ) {
     const gl = this.gl;
     this.setupRendering(bindToRenderTarget);
 
     gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, this.bgTexture);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
 
     gl.useProgram(this.blurProgram);
-    gl.uniform1i(this.uniformLocation.gaussian, 1);
+    gl.uniform1i(this.uniformLocation.gaussian, 0);
     gl.uniform1i(this.uniformLocation.horizontal, horizontal ? 1 : 0);
     gl.uniform1fv(this.uniformLocation.weight, this.weight);
     gl.uniform1i(this.uniformLocation.texture0, 0);
