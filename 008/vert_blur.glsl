@@ -1,9 +1,6 @@
 #version 300 es
 
 in vec3 position;
-in vec2 texCoord;
-in vec2 texSize;
-in vec2 resolution;
 out vec2 vTexCoord;
 
 void main(void){
