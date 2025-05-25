@@ -2,9 +2,10 @@ import * as THREE from "three";
 
 window.addEventListener(
   "DOMContentLoaded",
-  () => {
+  async () => {
     const wrapper = document.querySelector("#webgl");
-    const app = new ThreeApp(wrapper);
+    const app = new ThreeApp();
+    await app.init(wrapper);
     app.render();
   },
   false,
@@ -14,10 +15,16 @@ class ThreeApp {
   static CAMERA_PARAM = {
     fovy: 60,
     aspect: window.innerWidth / window.innerHeight,
-    near: 0.1,
+    near: 0.01,
     far: 20.0,
-    position: new THREE.Vector3(0.0, 2.0, 10.0),
-    lookAt: new THREE.Vector3(0.0, 0.0, 0.0),
+    position: new THREE.Vector3(0.0, 0.0, 0.9),
+    lookAt: new THREE.Vector3(0.0, 0.51, 0.0),
+  };
+  static DIRECTIONAL_LIGHT_PARAM = {
+    color: 0xffffff,
+    intensity: 1.0,
+    position: new THREE.Vector3(0.0, 0.2, 1.0),
+    targetPosition:new THREE.Vector3(0.0, 0.0, 0.0),
   };
   static RENDERER_PARAM = {
     clearColor: 0x666666,
@@ -44,16 +51,27 @@ class ThreeApp {
   scene;
   camera;
   startTime;
+  directionalLight;
   ambientLight;
-  rotationSpeed = 0;
-  material;
-  sphereGeometry;
-  sphereArray;
+  earth;
+  cone;
   axesHelper;
-  isKeyDown;
-  isTouched;
 
-  constructor(wrapper) {
+  static loadTexture(path) {
+    return new Promise((resolve) => {
+      // 地球用画像の読み込みとテクスチャ生成 @@@
+      const loader = new THREE.TextureLoader();
+      loader.load(path, resolve);
+    });
+  }
+
+  static createCone() {
+    const geometry = new THREE.ConeGeometry( 5, 20, 32 );
+    const material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+    return new THREE.Mesh(geometry, material);
+  }
+
+  async init(wrapper) {
     const color = new THREE.Color(ThreeApp.RENDERER_PARAM.clearColor);
     this.renderer = new THREE.WebGLRenderer();
     this.renderer.setClearColor(color);
@@ -74,75 +92,41 @@ class ThreeApp {
     this.camera.position.copy(ThreeApp.CAMERA_PARAM.position);
     this.camera.lookAt(ThreeApp.CAMERA_PARAM.lookAt);
 
+    this.directionalLight = new THREE.DirectionalLight(
+      ThreeApp.AMBIENT_LIGHT_PARAM.color,
+      ThreeApp.AMBIENT_LIGHT_PARAM.intensity,
+    );
+
+    // this.directionalLight.position.set(ThreeApp.DIRECTIONAL_LIGHT_PARAM.position);
+    this.directionalLight.position.copy(ThreeApp.DIRECTIONAL_LIGHT_PARAM.position);
+    this.directionalLight.target.position.copy(ThreeApp.DIRECTIONAL_LIGHT_PARAM.targetPosition);
+    this.scene.add(this.directionalLight);
+
     this.ambientLight = new THREE.AmbientLight(
       ThreeApp.AMBIENT_LIGHT_PARAM.color,
       ThreeApp.AMBIENT_LIGHT_PARAM.intensity,
     );
-    this.scene.add(this.ambientLight);
+    // this.scene.add(this.ambientLight);
 
-    this.material = new THREE.MeshPhongMaterial(ThreeApp.MATERIAL_PARAM);
+    // earth
+    const sphereGeometry = new THREE.SphereGeometry(0.5, 32, 32);
+    const earthTexture = await ThreeApp.loadTexture("./earth.jpg");
+    const earthMaterial = new THREE.MeshPhongMaterial(ThreeApp.MATERIAL_PARAM);
+    earthMaterial.map = earthTexture;
+    this.earth = new THREE.Mesh(sphereGeometry, earthMaterial);
+    this.scene.add(this.earth);
 
-    this.group = new THREE.Group();
-    this.scene.add(this.group);
-
-    this.sphereGeometry = new THREE.SphereGeometry(
-      ThreeApp.CIRCLE_OBJECT_PARAM.ballRadius,
-    );
-    this.speres = [];
-    for (let i = 0; i < ThreeApp.CIRCLE_OBJECT_PARAM.ballAmount; ++i) {
-      const sphere = new THREE.Mesh(this.sphereGeometry, this.material);
-      const theta =
-        Math.PI * 2.0 * (i / ThreeApp.CIRCLE_OBJECT_PARAM.ballAmount);
-      const x = ThreeApp.CIRCLE_OBJECT_PARAM.circleRadius * Math.cos(theta);
-      const y = ThreeApp.CIRCLE_OBJECT_PARAM.circleRadius * Math.sin(theta);
-      sphere.position.x = x;
-      sphere.position.y = y;
-      sphere.position.z = 0;
-      this.group.add(sphere);
-    }
+    // cone
+    const cone = ThreeApp.createCone();
+    cone.position.set(0, 0.55, 0);
+    this.cone = cone;
+    // this.scene.add(cone);
 
     // this のバインド
     this.render = this.render.bind(this);
 
     this.isTouched = false;
     this.isKeyDown = false;
-
-    window.addEventListener(
-      "keydown",
-      (e) => {
-        switch (e.key) {
-          case " ":
-            this.isKeyDown = true;
-            break;
-          default:
-            break;
-        }
-      },
-      false,
-    );
-    window.addEventListener(
-      "keyup",
-      (_) => {
-        this.isKeyDown = false;
-      },
-      false,
-    );
-
-    window.addEventListener(
-      "mousedown",
-      (_) => {
-        this.isTouched = true;
-      },
-      false,
-    );
-    window.addEventListener(
-      "mouseup",
-      (e) => {
-        // e.preventDefault();
-        this.isTouched = false;
-      },
-      false,
-    );
 
     window.addEventListener(
       "resize",
@@ -159,23 +143,10 @@ class ThreeApp {
   render() {
     requestAnimationFrame(this.render);
 
-    this.rotationSpeed +=
-      ThreeApp.CIRCLE_OBJECT_PARAM.rotationAcceleration *
-      (this.isTouched || this.isKeyDown ? 1 : -1);
-
-    this.rotationSpeed = Math.min(
-      Math.max(this.rotationSpeed, 0.0),
-      ThreeApp.CIRCLE_OBJECT_PARAM.maxRotationSpeed,
-    );
-
-    this.group.rotation.z += this.rotationSpeed;
 
     const currentTime = performance.now();
     const elapsed = (currentTime - this.startTime) / 1000.0;
-    const { shakeHeadInterval } = ThreeApp.CIRCLE_OBJECT_PARAM;
-    this.group.rotation.y = Math.sin(
-      Math.PI * 2 * (elapsed / shakeHeadInterval),
-    );
+    this.earth.rotation.y = elapsed * 0.04; // 地球の自転
     this.renderer.render(this.scene, this.camera);
   }
 }
