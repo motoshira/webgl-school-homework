@@ -52,7 +52,7 @@ class ThreeApp {
   renderer;
   scene;
   camera;
-  startTime;
+  clock;
   directionalLight;
   ambientLight;
   earth;
@@ -78,6 +78,7 @@ class ThreeApp {
   }
 
   async init(wrapper) {
+    this.clock = new THREE.Clock({autoStart: true})
     const color = new THREE.Color(ThreeApp.RENDERER_PARAM.clearColor);
     this.renderer = new THREE.WebGLRenderer();
     this.renderer.setClearColor(color);
@@ -145,7 +146,6 @@ class ThreeApp {
       },
       false,
     );
-    this.startTime = performance.now();
   }
 
   updateConePosition() {
@@ -164,10 +164,7 @@ class ThreeApp {
 
   render() {
     requestAnimationFrame(this.render);
-
-
-    const currentTime = performance.now();
-    const elapsed = (currentTime - this.startTime) / 1000.0;
+    const elapsed = this.clock.getElapsedTime();
     this.earth.rotation.y = elapsed * 0.04; // 地球の自転
 
     this.updateConePosition();
