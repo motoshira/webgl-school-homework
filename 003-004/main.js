@@ -17,8 +17,8 @@ class ThreeApp {
     aspect: window.innerWidth / window.innerHeight,
     near: 0.01,
     far: 20.0,
-    position: new THREE.Vector3(0.0, 0.0, 0.9),
-    lookAt: new THREE.Vector3(0.0, 0.5, 0.0),
+    position: new THREE.Vector3(0.0, 0.0, 1.2),
+    lookAt: new THREE.Vector3(0.0, 0.0, 0.0),
   };
   static DIRECTIONAL_LIGHT_PARAM = {
     color: 0xffffff,
