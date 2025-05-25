@@ -45,7 +45,8 @@ class ThreeApp {
     // init position/rotation
     position: new THREE.Vector3(0, 0.25, 0.45),
     rotation: new THREE.Vector3(0, 0, 0),
-    speed: 0.01,
+    speed: 0.001,
+    turnScale: 0.0015,
   };
 
   renderer;
@@ -127,6 +128,8 @@ class ThreeApp {
     this.cone = cone;
     this.scene.add(cone);
 
+    this.coneDirection = new THREE.Vector3(1.0, 0.0);
+
     // this のバインド
     this.render = this.render.bind(this);
 
@@ -146,7 +149,17 @@ class ThreeApp {
   }
 
   updateConePosition() {
-    const position = this.cone.position;
+    // const direction = this.coneDirection.clone();
+    const sub = new THREE.Vector3().subVectors(this.earth.position, this.cone.position);
+    sub.normalize();
+    this.coneDirection.add(sub.multiplyScalar(ThreeApp.CONE_PARAM.turnScale));
+    this.coneDirection.normalize();
+    this.cone.position.add(this.coneDirection.clone().multiplyScalar(ThreeApp.CONE_PARAM.speed));
+
+    console.log("cone direction from center", this.cone.position.distanceTo(this.earth.position));
+
+    // TODO update cone rotation
+
   }
 
   render() {
@@ -156,6 +169,9 @@ class ThreeApp {
     const currentTime = performance.now();
     const elapsed = (currentTime - this.startTime) / 1000.0;
     this.earth.rotation.y = elapsed * 0.04; // 地球の自転
+
+    this.updateConePosition();
+
     this.renderer.render(this.scene, this.camera);
   }
 }
