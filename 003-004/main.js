@@ -38,15 +38,21 @@ class ThreeApp {
   static MATERIAL_PARAM = {
     color: 0xdddddd,
   };
+  static EARTH_PARAM = {
+    radius: 0.5,
+    widthSegments: 32,
+    heightSegments: 32,
+  }
   static CONE_PARAM = {
     color: 0xffffff,
     height: 0.01,
     radius: 0.01,
     // init position/rotation
-    position: new THREE.Vector3(0, 0.25, 0.45),
+    position: new THREE.Vector3(0, 0.0, 0.55),
     rotation: new THREE.Vector3(0, 0, 0),
-    speed: 0.001,
-    turnScale: 0.0015,
+    speed: 0.1,
+    // turnScale: 0.0015,
+    distance: 0.55,
   };
 
   renderer;
@@ -58,7 +64,7 @@ class ThreeApp {
   earth;
   cone;
   coneDirection;
-  nextConeDirection;
+  prevConeDirection;
   axesHelper;
 
   static loadTexture(path) {
@@ -116,9 +122,9 @@ class ThreeApp {
     this.scene.add(this.ambientLight);
 
     // earth
-    const sphereGeometry = new THREE.SphereGeometry(0.5, 32, 32);
-    const earthTexture = await ThreeApp.loadTexture("./earth.jpg");
-    const earthMaterial = new THREE.MeshPhongMaterial(ThreeApp.MATERIAL_PARAM);
+    const sphereGeometry = new THREE.SphereGeometry(ThreeApp.EARTH_PARAM.radius, ThreeApp.EARTH_PARAM.widthSegments, ThreeApp.EARTH_PARAM.heightSegments)
+      const earthTexture = await ThreeApp.loadTexture("./earth.jpg");
+      const earthMaterial = new THREE.MeshPhongMaterial(ThreeApp.MATERIAL_PARAM);
     earthMaterial.map = earthTexture;
     this.earth = new THREE.Mesh(sphereGeometry, earthMaterial);
     this.scene.add(this.earth);
@@ -134,9 +140,6 @@ class ThreeApp {
     // this のバインド
     this.render = this.render.bind(this);
 
-    this.isTouched = false;
-    this.isKeyDown = false;
-
     window.addEventListener(
       "resize",
       () => {
@@ -148,18 +151,21 @@ class ThreeApp {
     );
   }
 
-  updateConePosition() {
+  updateConePositionAndRotation() {
     // const direction = this.coneDirection.clone();
-    const sub = new THREE.Vector3().subVectors(this.earth.position, this.cone.position);
-    sub.normalize();
-    this.coneDirection.add(sub.multiplyScalar(ThreeApp.CONE_PARAM.turnScale));
-    this.coneDirection.normalize();
-    this.cone.position.add(this.coneDirection.clone().multiplyScalar(ThreeApp.CONE_PARAM.speed));
+    const elapsed = this.clock.getElapsedTime();
+    /* const sub = new THREE.Vector3().subVectors(this.earth.position, this.cone.position);
+     * sub.normalize();
+     * this.coneDirection.add(sub.multiplyScalar(ThreeApp.CONE_PARAM.turnScale));
+     * this.coneDirection.normalize();
+     * this.cone.position.add(this.coneDirection.clone().multiplyScalar(ThreeApp.CONE_PARAM.speed)); */
 
-    console.log("cone direction from center", this.cone.position.distanceTo(this.earth.position));
-
+    const theta = elapsed * ThreeApp.CONE_PARAM.speed;
+    const newX = 0.0;
+    const newY = Math.cos(theta) * ThreeApp.CONE_PARAM.distance;
+    const newZ = Math.sin(theta) * ThreeApp.CONE_PARAM.distance;
+    this.cone.position.set(newX, newY, newZ);
     // TODO update cone rotation
-
   }
 
   render() {
@@ -167,7 +173,8 @@ class ThreeApp {
     const elapsed = this.clock.getElapsedTime();
     this.earth.rotation.y = elapsed * 0.04; // 地球の自転
 
-    this.updateConePosition();
+    this.updateConePositionAndRotation();
+    // TODO update camera position
 
     this.renderer.render(this.scene, this.camera);
   }
