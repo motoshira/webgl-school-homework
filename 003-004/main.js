@@ -18,7 +18,7 @@ class ThreeApp {
     near: 0.01,
     far: 20.0,
     position: new THREE.Vector3(0.0, 0.0, 0.9),
-    lookAt: new THREE.Vector3(0.0, 0.51, 0.0),
+    lookAt: new THREE.Vector3(0.0, 0.5, 0.0),
   };
   static DIRECTIONAL_LIGHT_PARAM = {
     color: 0xffffff,
@@ -33,18 +33,19 @@ class ThreeApp {
   };
   static AMBIENT_LIGHT_PARAM = {
     color: 0xffffff,
-    intensity: 1.0,
+    intensity: 0.5,
   };
   static MATERIAL_PARAM = {
     color: 0xdddddd,
   };
-  static CIRCLE_OBJECT_PARAM = {
-    ballRadius: 0.3,
-    ballAmount: 30,
-    circleRadius: 4.5,
-    rotationAcceleration: 0.001,
-    maxRotationSpeed: 0.1,
-    shakeHeadInterval: 10.0,
+  static CONE_PARAM = {
+    color: 0xffffff,
+    height: 0.01,
+    radius: 0.01,
+    // init position/rotation
+    position: new THREE.Vector3(0, 0.25, 0.45),
+    rotation: new THREE.Vector3(0, 0, 0),
+    speed: 0.01,
   };
 
   renderer;
@@ -55,6 +56,8 @@ class ThreeApp {
   ambientLight;
   earth;
   cone;
+  coneDirection;
+  nextConeDirection;
   axesHelper;
 
   static loadTexture(path) {
@@ -66,9 +69,11 @@ class ThreeApp {
   }
 
   static createCone() {
-    const geometry = new THREE.ConeGeometry( 5, 20, 32 );
-    const material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-    return new THREE.Mesh(geometry, material);
+    const { color, height, radius } = ThreeApp.CONE_PARAM;
+    const geometry = new THREE.ConeGeometry( radius, height, 32 );
+    const material = new THREE.MeshLambertMaterial( {color} );
+    const cone = new THREE.Mesh(geometry, material);
+    return cone;
   }
 
   async init(wrapper) {
@@ -106,7 +111,7 @@ class ThreeApp {
       ThreeApp.AMBIENT_LIGHT_PARAM.color,
       ThreeApp.AMBIENT_LIGHT_PARAM.intensity,
     );
-    // this.scene.add(this.ambientLight);
+    this.scene.add(this.ambientLight);
 
     // earth
     const sphereGeometry = new THREE.SphereGeometry(0.5, 32, 32);
@@ -118,9 +123,9 @@ class ThreeApp {
 
     // cone
     const cone = ThreeApp.createCone();
-    cone.position.set(0, 0.55, 0);
+    cone.position.copy(ThreeApp.CONE_PARAM.position);
     this.cone = cone;
-    // this.scene.add(cone);
+    this.scene.add(cone);
 
     // this のバインド
     this.render = this.render.bind(this);
@@ -138,6 +143,10 @@ class ThreeApp {
       false,
     );
     this.startTime = performance.now();
+  }
+
+  updateConePosition() {
+    const position = this.cone.position;
   }
 
   render() {
