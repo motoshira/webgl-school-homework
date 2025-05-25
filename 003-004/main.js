@@ -17,7 +17,8 @@ class ThreeApp {
     aspect: window.innerWidth / window.innerHeight,
     near: 0.01,
     far: 20.0,
-    position: new THREE.Vector3(0.0, 0.0, 1.2),
+    distance: 0.9,
+    position: new THREE.Vector3(0.0, 0.0, 0.9),
     lookAt: new THREE.Vector3(0.0, 0.0, 0.0),
   };
   static DIRECTIONAL_LIGHT_PARAM = {
@@ -168,12 +169,22 @@ class ThreeApp {
     // TODO update cone rotation
   }
 
+  updateCameraPosition() {
+    const elapsed = this.clock.getElapsedTime();
+    const theta = elapsed * ThreeApp.CONE_PARAM.speed + 0.3;
+    const newX = 0.0;
+    const newY = Math.cos(theta) * ThreeApp.CAMERA_PARAM.distance;
+    const newZ = Math.sin(theta) * ThreeApp.CAMERA_PARAM.distance;
+    this.camera.position.set(newX, newY, newZ);
+    this.camera.lookAt(this.cone.position);
+  }
   render() {
     requestAnimationFrame(this.render);
     const elapsed = this.clock.getElapsedTime();
     this.earth.rotation.y = elapsed * 0.04; // 地球の自転
 
     this.updateConePositionAndRotation();
+    this.updateCameraPosition();
     // TODO update camera position
 
     this.renderer.render(this.scene, this.camera);
