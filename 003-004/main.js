@@ -7,11 +7,6 @@ window.addEventListener(
     const app = new ThreeApp();
     await app.init(wrapper);
     app.render();
-        setInterval(() => {
-          // console.log(app.coneDirection, app.cone.position)
-          console.log(app.clock.getElapsedTime() * ThreeApp.CONE_PARAM.speed/ Math.PI / 2, app.cone.position, app.coneDirection);
-        }, 1000)
-
   },
   false,
 );
@@ -23,8 +18,8 @@ class ThreeApp {
     near: 0.01,
     far: 20.0,
     distance: 0.9,
-    // position: new THREE.Vector3(0.0, 0.0, 1.2),
-    position: new THREE.Vector3(1.2,0, 0),
+    position: new THREE.Vector3(0.0, 0.0, 1.2),
+    // position: new THREE.Vector3(1.2,0, 0),
     lookAt: new THREE.Vector3(0.0, 0.0, 0.0),
   };
   static DIRECTIONAL_LIGHT_PARAM = {
@@ -65,13 +60,13 @@ class ThreeApp {
   renderer;
   scene;
   camera;
+  cameraDirection;
   clock;
   directionalLight;
   ambientLight;
   earth;
   cone;
   coneDirection;
-  prevConeDirection;
   axesHelper;
 
   static loadTexture(path) {
@@ -110,7 +105,7 @@ class ThreeApp {
       ThreeApp.CAMERA_PARAM.far,
     );
     this.camera.position.copy(ThreeApp.CAMERA_PARAM.position);
-    this.camera.lookAt(ThreeApp.CAMERA_PARAM.lookAt);
+    this.cameraDirection = new THREE.Vector3().copy(ThreeApp.CAMERA_PARAM.lookAt);
 
     this.directionalLight = new THREE.DirectionalLight(
       ThreeApp.DIRECTIONAL_LIGHT_PARAM.color,
@@ -144,6 +139,9 @@ class ThreeApp {
 
     this.coneDirection = new THREE.Vector3(1.0, 0.0, 0.0);
 
+    this.cameraDirection.subVectors(this.cone.position, this.camera.position);
+    this.camera.lookAt(this.cone.position);
+
     // this のバインド
     this.render = this.render.bind(this);
 
@@ -162,47 +160,34 @@ class ThreeApp {
     const elapsed = this.clock.getElapsedTime();
 
     const currentPosition = this.cone.position.clone();
-    const currentDirection = this.coneDirection.clone();
     const theta = elapsed * ThreeApp.CONE_PARAM.speed;
     const newX = 0.0;
     const newY = Math.cos(theta) * ThreeApp.CONE_PARAM.distance;
     const newZ = Math.sin(theta) * ThreeApp.CONE_PARAM.distance;
-
     this.cone.position.set(newX, newY, newZ);
 
-    // update cone rotation
-    const direction = new THREE.Vector3().subVectors(this.cone.position, currentPosition);
-    direction.normalize();
-    this.coneDirection.copy(direction);
+    this.coneDirection.subVectors(this.cone.position, currentPosition);
 
-    const normalAxis = new THREE.Vector3().crossVectors(currentDirection, this.coneDirection);
-
-    normalAxis.normalize();
-    const cos = currentDirection.dot(this.coneDirection);
-    const angle = Math.acos(cos);
-    const quaternion = new THREE.Quaternion().setFromAxisAngle(normalAxis, angle);
-
-    // this.cone.lookAt(this.coneDirection);
-    this.cone.quaternion.premultiply(quaternion);
+    // upを更新しないと z < 0 のときに反転してしまう
+    this.cone.up.subVectors(this.cone.position, this.earth.position);
+    // 同じ向き
+    this.cone.lookAt(this.coneDirection);
   }
 
   updateCameraPositionAndRotation() {
     const elapsed = this.clock.getElapsedTime();
     const theta = elapsed * ThreeApp.CONE_PARAM.speed + 0.3;
-    const newX = 0.0;
+    const newX = 0.1;
     const newY = Math.cos(theta) * ThreeApp.CAMERA_PARAM.distance;
     const newZ = Math.sin(theta) * ThreeApp.CAMERA_PARAM.distance;
     this.camera.position.set(newX, newY, newZ);
+    // upを更新していないので反転するが、この更新を入れるとガタガタしてしまう
+    // this.camera.up.subVectors(this.camera.position, this.cone.position);
     this.camera.lookAt(this.cone.position);
-
-    // TODO update camera rotation
-
   }
   render() {
     this.updateConePositionAndRotation();
     this.updateCameraPositionAndRotation();
-
-
     this.renderer.render(this.scene, this.camera);
     requestAnimationFrame(this.render);
   }
