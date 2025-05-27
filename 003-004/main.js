@@ -7,6 +7,11 @@ window.addEventListener(
     const app = new ThreeApp();
     await app.init(wrapper);
     app.render();
+        setInterval(() => {
+          // console.log(app.coneDirection, app.cone.position)
+          console.log(app.clock.getElapsedTime() * ThreeApp.CONE_PARAM.speed/ Math.PI / 2, app.cone.position, app.coneDirection);
+        }, 1000)
+
   },
   false,
 );
@@ -18,7 +23,8 @@ class ThreeApp {
     near: 0.01,
     far: 20.0,
     distance: 0.9,
-    position: new THREE.Vector3(0.0, 0.0, 0.9),
+    // position: new THREE.Vector3(0.0, 0.0, 1.2),
+    position: new THREE.Vector3(1.2,0, 0),
     lookAt: new THREE.Vector3(0.0, 0.0, 0.0),
   };
   static DIRECTIONAL_LIGHT_PARAM = {
@@ -34,7 +40,7 @@ class ThreeApp {
   };
   static AMBIENT_LIGHT_PARAM = {
     color: 0xffffff,
-    intensity: 0.5,
+    intensity: 1.0,
   };
   static MATERIAL_PARAM = {
     color: 0xdddddd,
@@ -46,12 +52,12 @@ class ThreeApp {
   }
   static CONE_PARAM = {
     color: 0xffffff,
-    height: 0.01,
+    height: 0.03,
     radius: 0.01,
     // init position/rotation
     position: new THREE.Vector3(0, 0.0, 0.55),
     rotation: new THREE.Vector3(0, 0, 0),
-    speed: 0.1,
+    speed: 0.3,
     // turnScale: 0.0015,
     distance: 0.55,
   };
@@ -107,8 +113,8 @@ class ThreeApp {
     this.camera.lookAt(ThreeApp.CAMERA_PARAM.lookAt);
 
     this.directionalLight = new THREE.DirectionalLight(
-      ThreeApp.AMBIENT_LIGHT_PARAM.color,
-      ThreeApp.AMBIENT_LIGHT_PARAM.intensity,
+      ThreeApp.DIRECTIONAL_LIGHT_PARAM.color,
+      ThreeApp.DIRECTIONAL_LIGHT_PARAM.intensity,
     );
 
     // this.directionalLight.position.set(ThreeApp.DIRECTIONAL_LIGHT_PARAM.position);
@@ -128,7 +134,7 @@ class ThreeApp {
       const earthMaterial = new THREE.MeshPhongMaterial(ThreeApp.MATERIAL_PARAM);
     earthMaterial.map = earthTexture;
     this.earth = new THREE.Mesh(sphereGeometry, earthMaterial);
-    this.scene.add(this.earth);
+     this.scene.add(this.earth);
 
     // cone
     const cone = ThreeApp.createCone();
@@ -136,7 +142,7 @@ class ThreeApp {
     this.cone = cone;
     this.scene.add(cone);
 
-    this.coneDirection = new THREE.Vector3(1.0, 0.0);
+    this.coneDirection = new THREE.Vector3(1.0, 0.0, 0.0);
 
     // this のバインド
     this.render = this.render.bind(this);
@@ -153,23 +159,34 @@ class ThreeApp {
   }
 
   updateConePositionAndRotation() {
-    // const direction = this.coneDirection.clone();
     const elapsed = this.clock.getElapsedTime();
-    /* const sub = new THREE.Vector3().subVectors(this.earth.position, this.cone.position);
-     * sub.normalize();
-     * this.coneDirection.add(sub.multiplyScalar(ThreeApp.CONE_PARAM.turnScale));
-     * this.coneDirection.normalize();
-     * this.cone.position.add(this.coneDirection.clone().multiplyScalar(ThreeApp.CONE_PARAM.speed)); */
 
+    const currentPosition = this.cone.position.clone();
+    const currentDirection = this.coneDirection.clone();
     const theta = elapsed * ThreeApp.CONE_PARAM.speed;
     const newX = 0.0;
     const newY = Math.cos(theta) * ThreeApp.CONE_PARAM.distance;
     const newZ = Math.sin(theta) * ThreeApp.CONE_PARAM.distance;
+
     this.cone.position.set(newX, newY, newZ);
-    // TODO update cone rotation
+
+    // update cone rotation
+    const direction = new THREE.Vector3().subVectors(this.cone.position, currentPosition);
+    direction.normalize();
+    this.coneDirection.copy(direction);
+
+    const normalAxis = new THREE.Vector3().crossVectors(currentDirection, this.coneDirection);
+
+    normalAxis.normalize();
+    const cos = currentDirection.dot(this.coneDirection);
+    const angle = Math.acos(cos);
+    const quaternion = new THREE.Quaternion().setFromAxisAngle(normalAxis, angle);
+
+    // this.cone.lookAt(this.coneDirection);
+    this.cone.quaternion.premultiply(quaternion);
   }
 
-  updateCameraPosition() {
+  updateCameraPositionAndRotation() {
     const elapsed = this.clock.getElapsedTime();
     const theta = elapsed * ThreeApp.CONE_PARAM.speed + 0.3;
     const newX = 0.0;
@@ -177,16 +194,16 @@ class ThreeApp {
     const newZ = Math.sin(theta) * ThreeApp.CAMERA_PARAM.distance;
     this.camera.position.set(newX, newY, newZ);
     this.camera.lookAt(this.cone.position);
+
+    // TODO update camera rotation
+
   }
   render() {
-    requestAnimationFrame(this.render);
-    const elapsed = this.clock.getElapsedTime();
-    this.earth.rotation.y = elapsed * 0.04; // 地球の自転
-
     this.updateConePositionAndRotation();
-    this.updateCameraPosition();
-    // TODO update camera position
+    this.updateCameraPositionAndRotation();
+
 
     this.renderer.render(this.scene, this.camera);
+    requestAnimationFrame(this.render);
   }
 }
