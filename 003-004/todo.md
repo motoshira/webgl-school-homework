@@ -16,3 +16,17 @@
   - Camera
   - Objs
 - [ ] 飛行物体を中心に真上から満た様子をrenderする 0.5pt
+
+Objects
+- [ ] ThreeAppから移動させる
+
+MiniMapRenderer
+- [ ] 右下に表示させる
+
+WorldRenderer
+- [ ] 既存のThreeAppの代わりに表示
+
+
+
+ThreeApp
+- [ ]

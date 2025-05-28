@@ -63,14 +63,20 @@ class WorldRenderer {
 
   renderer;
   scene;
+
+  // objects
   camera;
   cameraDirection;
-  clock;
-  directionalLight;
-  ambientLight;
   earth;
   cone;
   coneDirection;
+
+  // lighting
+  directionalLight;
+  ambientLight;
+
+  // helper
+  clock;
   axesHelper;
 
   static loadTexture(path) {
@@ -246,14 +252,20 @@ class ThreeApp {
 
   renderer;
   scene;
+
+  // objects
   camera;
   cameraDirection;
-  clock;
-  directionalLight;
-  ambientLight;
   earth;
   cone;
   coneDirection;
+
+  // lighting
+  directionalLight;
+  ambientLight;
+
+  // helper
+  clock;
   axesHelper;
 
   static loadTexture(path) {
