@@ -23,20 +23,11 @@ const loadTexture = (path) => {
 // TODO 画面右下のミニマップを描画する
 class MiniMapRenderer {
   static CAMERA_PARAM = {
-    fovy: 60,
-    aspect: window.innerWidth / window.innerHeight,
     near: 0.01,
-    far: 20.0,
-    distance: 0.9,
+    far: 1000.0,
+    distance: 0.8,
     position: new THREE.Vector3(0.0, 0.0, 1.2),
-    // position: new THREE.Vector3(1.2,0, 0),
     lookAt: new THREE.Vector3(0.0, 0.0, 0.0),
-  };
-  static DIRECTIONAL_LIGHT_PARAM = {
-    color: 0xffffff,
-    intensity: 2.0,
-    position: new THREE.Vector3(0.0, 0.2, 1.0),
-    targetPosition: new THREE.Vector3(0.0, 0.0, 0.0),
   };
   static RENDERER_PARAM = {
     clearColor: 0x222222,
@@ -45,7 +36,7 @@ class MiniMapRenderer {
   };
   static AMBIENT_LIGHT_PARAM = {
     color: 0xffffff,
-    intensity: 0.3,
+    intensity: 2.0,
   };
 
   // from ctor props
@@ -63,7 +54,6 @@ class MiniMapRenderer {
   earth;
   cone;
 
-  directionalLight;
   ambientLight;
 
   constructor({renderer, renderTarget, coneDirection, clock}) {
@@ -77,22 +67,15 @@ class MiniMapRenderer {
     this.scene = new THREE.Scene();
     this.clearColor = new THREE.Color(MiniMapRenderer.RENDERER_PARAM.clearColor);
 
-    this.camera = new THREE.PerspectiveCamera(
-      MiniMapRenderer.CAMERA_PARAM.fovy,
-      MiniMapRenderer.CAMERA_PARAM.aspect,
+
+    this.camera = new THREE.OrthographicCamera(
+      -0.02, 0.02, 0.02, -0.02,
       MiniMapRenderer.CAMERA_PARAM.near,
       MiniMapRenderer.CAMERA_PARAM.far,
     );
+
     this.camera.position.copy(MiniMapRenderer.CAMERA_PARAM.position);
     this.cameraDirection = new THREE.Vector3().copy(MiniMapRenderer.CAMERA_PARAM.lookAt);
-
-    this.directionalLight = new THREE.DirectionalLight(
-      MiniMapRenderer.DIRECTIONAL_LIGHT_PARAM.color,
-      MiniMapRenderer.DIRECTIONAL_LIGHT_PARAM.intensity,
-    );
-    this.directionalLight.position.copy(MiniMapRenderer.DIRECTIONAL_LIGHT_PARAM.position);
-    this.directionalLight.target.position.copy(MiniMapRenderer.DIRECTIONAL_LIGHT_PARAM.targetPosition);
-    this.scene.add(this.directionalLight);
 
     this.ambientLight = new THREE.AmbientLight(
       MiniMapRenderer.AMBIENT_LIGHT_PARAM.color,
@@ -126,7 +109,6 @@ class MiniMapRenderer {
     window.addEventListener(
       "resize",
       () => {
-        this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
       },
       false,
@@ -135,7 +117,7 @@ class MiniMapRenderer {
 
   updateCameraPositionAndRotation() {
     const elapsed = this.clock.getElapsedTime();
-    const theta = elapsed * ThreeApp.CONE_PARAM.speed + 0.3;
+    const theta = elapsed * ThreeApp.CONE_PARAM.speed;
     const newX = 0.1;
     const newY = Math.cos(theta) * MiniMapRenderer.CAMERA_PARAM.distance;
     const newZ = Math.sin(theta) * MiniMapRenderer.CAMERA_PARAM.distance;
@@ -148,7 +130,7 @@ class MiniMapRenderer {
     this.renderer.setClearColor(this.clearColor);
     this.updateCameraPositionAndRotation();
     this.renderer.setRenderTarget(this.renderTarget);
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setSize(window.innerWidth / 2, window.innerWidth / 2);
     this.renderer.render(this.scene, this.camera);
     this.renderer.setRenderTarget(null);
   }
@@ -353,7 +335,7 @@ class ThreeApp {
 
     const width = window.innerWidth;
     const height = window.innerHeight;
-    const mapWidth = height / 2
+    const mapWidth = width / 2
 
     this.coneDirection = new THREE.Vector3(1.0, 0.0, 0.0);
 
@@ -461,8 +443,11 @@ class ThreeApp {
       this.coneDirection.subVectors(cone.position, currentPosition);
 
       cone.position.set(newX, newY, newZ);
+      // FIXME
       // upを更新しないと z < 0 のときに反転してしまう？
-      cone.up.subVectors(cone.position, earth.position);
+      // 更新した場合も向きがガクガクと入れかわってしまう
+      // cone.up.subVectors(cone.position, earth.position);
+      // cone.up.setZ(cone.position.y < 0 ? -1 : 1);
       // 同じ向き
       cone.lookAt(this.coneDirection);
     }
