@@ -23,9 +23,13 @@ const loadTexture = (path) => {
 // TODO 画面右下のミニマップを描画する
 class MiniMapRenderer {
   static CAMERA_PARAM = {
+    fovy: 60,
+    aspect: window.innerWidth / window.innerHeight,
     near: 0.01,
-    far: 1000.0,
+    far: 20.0,
+    distance: 0.9,
     position: new THREE.Vector3(0.0, 0.0, 1.2),
+    // position: new THREE.Vector3(1.2,0, 0),
     lookAt: new THREE.Vector3(0.0, 0.0, 0.0),
   };
   static DIRECTIONAL_LIGHT_PARAM = {
@@ -35,17 +39,19 @@ class MiniMapRenderer {
     targetPosition: new THREE.Vector3(0.0, 0.0, 0.0),
   };
   static RENDERER_PARAM = {
-    clearColor: 0xaaaaaa,
+    clearColor: 0x222222,
+    width: window.innerWidth,
+    height: window.innerHeight,
   };
   static AMBIENT_LIGHT_PARAM = {
     color: 0xffffff,
-    intensity: 1.0,
+    intensity: 0.3,
   };
 
   // from ctor props
   renderer;
   renderTarget;
-  cone;
+  clearColor;
   coneDirection;
   clock;
 
@@ -53,21 +59,18 @@ class MiniMapRenderer {
   scene;
   camera;
   cameraDirection;
-  clearColor;
 
   earth;
+  cone;
 
   directionalLight;
   ambientLight;
-
-  width;
 
   constructor({renderer, renderTarget, coneDirection, clock}) {
     this.renderer = renderer;
     this.renderTarget = renderTarget
     this.coneDirection = coneDirection;
     this.clock = clock;
-    this.width = window.innerWidth / 2;
   }
 
   async init() {
@@ -80,7 +83,6 @@ class MiniMapRenderer {
       MiniMapRenderer.CAMERA_PARAM.near,
       MiniMapRenderer.CAMERA_PARAM.far,
     );
-
     this.camera.position.copy(MiniMapRenderer.CAMERA_PARAM.position);
     this.cameraDirection = new THREE.Vector3().copy(MiniMapRenderer.CAMERA_PARAM.lookAt);
 
@@ -124,9 +126,7 @@ class MiniMapRenderer {
     window.addEventListener(
       "resize",
       () => {
-        this.width = window.innerWidth / 2;
-        // this.camera.aspect = window.innerWidth / window.innerHeight;
-        this.camera.aspect = 1;
+        this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
       },
       false,
@@ -148,7 +148,7 @@ class MiniMapRenderer {
     this.renderer.setClearColor(this.clearColor);
     this.updateCameraPositionAndRotation();
     this.renderer.setRenderTarget(this.renderTarget);
-    this.renderer.setSize(this.width, this.width);
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.render(this.scene, this.camera);
     this.renderer.setRenderTarget(null);
   }
