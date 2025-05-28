@@ -11,14 +11,11 @@
 
 ミニマップ表示
 <!-- - [ ] 共通のオブジェクト達を World クラスに移動 -->
-- [ ] 画面右下にミニマップ表示を追加 (別のRendererを用意 MiniMapRenderer) 1pt
+- [x] 画面右下にミニマップ表示を追加 (別のRendererを用意 MiniMapRenderer) 1pt
   - Light
   - Camera
   - Objs
 - [ ] 飛行物体を中心に真上から満た様子をrenderする 0.5pt
-
-Objects
-- [ ] ThreeAppから移動させる
 
 MiniMapRenderer
 - [ ] 右下に表示させる
@@ -27,6 +24,6 @@ WorldRenderer
 - [ ] 既存のThreeAppの代わりに表示
 
 
-
 ThreeApp
-- [ ]
+- [ ] 2つのplaneを配置
+- [ ] WorldRendererをレンダーする
