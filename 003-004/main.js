@@ -446,10 +446,10 @@ class ThreeApp {
 
       cone.position.set(newX, newY, newZ);
       // FIXME 進行方向と同じ向きにしたいが上手くいかない…
-      // 更新した場合も向きがガクガクと入れかわってしまう
+      cone.lookAt(this.coneDirection);
+      cone.up.setZ(newZ > 0 ? 1 : -1);
+      // これで更新した場合も向きがガクガクと入れかわってしまう
       // cone.up.subVectors(cone.position, earth.position);
-      // cone.lookAt(this.coneDirection);
-      // cone.up.setZ(newZ < 0 ? -1 : 1);
     }
   }
 
