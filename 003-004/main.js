@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import earthImg from "./earth.jpg"
 
 // test
 
@@ -52,6 +53,7 @@ class MiniMapRenderer {
   scene;
   camera;
   cameraDirection;
+  width;
 
   earth;
   cone;
@@ -63,6 +65,7 @@ class MiniMapRenderer {
     this.renderTarget = renderTarget
     this.coneDirection = coneDirection;
     this.clock = clock;
+    this.width = Math.min(window.innerWidth / 2, window.innerHeight / 2);
   }
 
   async init() {
@@ -87,7 +90,7 @@ class MiniMapRenderer {
 
     // earth
     const sphereGeometry = new THREE.SphereGeometry(ThreeApp.EARTH_PARAM.radius, ThreeApp.EARTH_PARAM.widthSegments, ThreeApp.EARTH_PARAM.heightSegments)
-    const earthTexture = await loadTexture("./earth.jpg");
+    const earthTexture = await loadTexture(earthImg);
     const earthMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
     earthMaterial.map = earthTexture;
     this.earth = new THREE.Mesh(sphereGeometry, earthMaterial);
@@ -111,6 +114,7 @@ class MiniMapRenderer {
     window.addEventListener(
       "resize",
       () => {
+        this.width = Math.min(window.innerWidth / 2, window.innerHeight / 2);
         this.camera.updateProjectionMatrix();
       },
       false,
@@ -124,7 +128,7 @@ class MiniMapRenderer {
     const newY = Math.cos(theta) * MiniMapRenderer.CAMERA_PARAM.distance;
     const newZ = Math.sin(theta) * MiniMapRenderer.CAMERA_PARAM.distance;
     this.camera.position.set(newX, newY, newZ);
-    // upを更新していないので反転するが、この更新を入れるとガタガタしてしまう
+    // FIXME upを更新していないので反転するが、この更新を入れるとガタガタしてしまう？
     // this.camera.up.subVectors(this.camera.position, this.cone.position);
     this.camera.lookAt(this.cone.position);
   }
@@ -132,7 +136,7 @@ class MiniMapRenderer {
     this.renderer.setClearColor(this.clearColor);
     this.updateCameraPositionAndRotation();
     this.renderer.setRenderTarget(this.renderTarget);
-    this.renderer.setSize(window.innerWidth / 2, window.innerWidth / 2);
+    this.renderer.setSize(this.width, this.width);
     this.renderer.render(this.scene, this.camera);
     this.renderer.setRenderTarget(null);
   }
@@ -157,7 +161,8 @@ class WorldRenderer {
     targetPosition: new THREE.Vector3(0.0, 0.0, 0.0),
   };
   static RENDERER_PARAM = {
-    clearColor: 0x222222,
+    // clearColor: 0x222222,
+    clearColor: 0xdddddd,
     width: window.innerWidth,
     height: window.innerHeight,
   };
@@ -253,7 +258,7 @@ class WorldRenderer {
 
   updateCameraPositionAndRotation() {
     const elapsed = this.clock.getElapsedTime();
-    const theta = elapsed * ThreeApp.CONE_PARAM.speed + 0.3;
+    const theta = elapsed * ThreeApp.CONE_PARAM.speed + 0.1 * Math.PI;
     const newX = 0.1;
     const newY = Math.cos(theta) * WorldRenderer.CAMERA_PARAM.distance;
     const newZ = Math.sin(theta) * WorldRenderer.CAMERA_PARAM.distance;
@@ -337,7 +342,7 @@ class ThreeApp {
 
     const width = window.innerWidth;
     const height = window.innerHeight;
-    const mapWidth = width / 2
+    const mapWidth = Math.min(width / 2, height / 2)
 
     this.coneDirection = new THREE.Vector3(1.0, 0.0, 0.0);
 
@@ -393,7 +398,6 @@ class ThreeApp {
       }),
     );
     this.worldPlane.position.set(0.0, 0.0, 0.0);
-    // this.worldPlane.rotation.x = - Math.PI / 2;
     this.scene.add(this.worldPlane);
 
     // minimap
@@ -404,12 +408,8 @@ class ThreeApp {
     this.minimapPlane = new THREE.Mesh(
       _minimapPlaneGeometry,
       new THREE.MeshStandardMaterial({
-        // color: 0x888888,
         map: this.miniMapRenderTarget.texture,
         side: THREE.DoubleSide,
-        // side: THREE.DoubleSide,
-        // transparent: true,
-        // opacity: 0.5,
       }),
     );
     this.minimapPlane.position.set(width / 2 - mapWidth / 2, -(height / 2 - mapWidth / 2), 1.0);
@@ -445,13 +445,11 @@ class ThreeApp {
       this.coneDirection.subVectors(cone.position, currentPosition);
 
       cone.position.set(newX, newY, newZ);
-      // FIXME
-      // upを更新しないと z < 0 のときに反転してしまう？
+      // FIXME 進行方向と同じ向きにしたいが上手くいかない…
       // 更新した場合も向きがガクガクと入れかわってしまう
       // cone.up.subVectors(cone.position, earth.position);
-      // cone.up.setZ(cone.position.y < 0 ? -1 : 1);
-      // 同じ向き
       cone.lookAt(this.coneDirection);
+      cone.up.setZ(newZ < 0 ? -1 : 1);
     }
   }
 
