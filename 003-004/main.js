@@ -52,6 +52,7 @@ class MiniMapRenderer {
   scene;
   camera;
   cameraDirection;
+  width;
 
   earth;
   cone;
@@ -63,6 +64,7 @@ class MiniMapRenderer {
     this.renderTarget = renderTarget
     this.coneDirection = coneDirection;
     this.clock = clock;
+    this.width = Math.min(window.innerWidth / 2, window.innerHeight / 2);
   }
 
   async init() {
@@ -111,6 +113,7 @@ class MiniMapRenderer {
     window.addEventListener(
       "resize",
       () => {
+        this.width = Math.min(window.innerWidth / 2, window.innerHeight / 2);
         this.camera.updateProjectionMatrix();
       },
       false,
@@ -132,7 +135,7 @@ class MiniMapRenderer {
     this.renderer.setClearColor(this.clearColor);
     this.updateCameraPositionAndRotation();
     this.renderer.setRenderTarget(this.renderTarget);
-    this.renderer.setSize(window.innerWidth / 2, window.innerWidth / 2);
+    this.renderer.setSize(this.width, this.width);
     this.renderer.render(this.scene, this.camera);
     this.renderer.setRenderTarget(null);
   }
