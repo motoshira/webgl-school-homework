@@ -341,7 +341,7 @@ class ThreeApp {
 
     const width = window.innerWidth;
     const height = window.innerHeight;
-    const mapWidth = width / 2
+    const mapWidth = Math.min(width / 2, height / 2)
 
     this.coneDirection = new THREE.Vector3(1.0, 0.0, 0.0);
 
