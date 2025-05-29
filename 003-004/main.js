@@ -128,7 +128,7 @@ class MiniMapRenderer {
     const newY = Math.cos(theta) * MiniMapRenderer.CAMERA_PARAM.distance;
     const newZ = Math.sin(theta) * MiniMapRenderer.CAMERA_PARAM.distance;
     this.camera.position.set(newX, newY, newZ);
-    // upを更新していないので反転するが、この更新を入れるとガタガタしてしまう
+    // FIXME upを更新していないので反転するが、この更新を入れるとガタガタしてしまう？
     // this.camera.up.subVectors(this.camera.position, this.cone.position);
     this.camera.lookAt(this.cone.position);
   }
@@ -258,7 +258,7 @@ class WorldRenderer {
 
   updateCameraPositionAndRotation() {
     const elapsed = this.clock.getElapsedTime();
-    const theta = elapsed * ThreeApp.CONE_PARAM.speed + 0.3;
+    const theta = elapsed * ThreeApp.CONE_PARAM.speed + 0.1 * Math.PI;
     const newX = 0.1;
     const newY = Math.cos(theta) * WorldRenderer.CAMERA_PARAM.distance;
     const newZ = Math.sin(theta) * WorldRenderer.CAMERA_PARAM.distance;
@@ -398,7 +398,6 @@ class ThreeApp {
       }),
     );
     this.worldPlane.position.set(0.0, 0.0, 0.0);
-    // this.worldPlane.rotation.x = - Math.PI / 2;
     this.scene.add(this.worldPlane);
 
     // minimap
@@ -409,12 +408,8 @@ class ThreeApp {
     this.minimapPlane = new THREE.Mesh(
       _minimapPlaneGeometry,
       new THREE.MeshStandardMaterial({
-        // color: 0x888888,
         map: this.miniMapRenderTarget.texture,
         side: THREE.DoubleSide,
-        // side: THREE.DoubleSide,
-        // transparent: true,
-        // opacity: 0.5,
       }),
     );
     this.minimapPlane.position.set(width / 2 - mapWidth / 2, -(height / 2 - mapWidth / 2), 1.0);
