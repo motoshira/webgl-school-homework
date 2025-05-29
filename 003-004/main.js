@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import earthImg from "./earth.jpg"
 
 // test
 
@@ -89,7 +90,7 @@ class MiniMapRenderer {
 
     // earth
     const sphereGeometry = new THREE.SphereGeometry(ThreeApp.EARTH_PARAM.radius, ThreeApp.EARTH_PARAM.widthSegments, ThreeApp.EARTH_PARAM.heightSegments)
-    const earthTexture = await loadTexture("./earth.jpg");
+    const earthTexture = await loadTexture(earthImg);
     const earthMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
     earthMaterial.map = earthTexture;
     this.earth = new THREE.Mesh(sphereGeometry, earthMaterial);
@@ -449,13 +450,11 @@ class ThreeApp {
       this.coneDirection.subVectors(cone.position, currentPosition);
 
       cone.position.set(newX, newY, newZ);
-      // FIXME
-      // upを更新しないと z < 0 のときに反転してしまう？
+      // FIXME 進行方向と同じ向きにしたいが上手くいかない…
       // 更新した場合も向きがガクガクと入れかわってしまう
       // cone.up.subVectors(cone.position, earth.position);
-      // cone.up.setZ(cone.position.y < 0 ? -1 : 1);
-      // 同じ向き
       cone.lookAt(this.coneDirection);
+      cone.up.setZ(newZ < 0 ? -1 : 1);
     }
   }
 
