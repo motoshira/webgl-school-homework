@@ -225,7 +225,7 @@ class WorldRenderer {
 
     // earth
     const sphereGeometry = new THREE.SphereGeometry(ThreeApp.EARTH_PARAM.radius, ThreeApp.EARTH_PARAM.widthSegments, ThreeApp.EARTH_PARAM.heightSegments)
-    const earthTexture = await loadTexture("./earth.jpg");
+    const earthTexture = await loadTexture(earthImg);
     const earthMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
     earthMaterial.map = earthTexture;
     this.earth = new THREE.Mesh(sphereGeometry, earthMaterial);
@@ -448,8 +448,8 @@ class ThreeApp {
       // FIXME 進行方向と同じ向きにしたいが上手くいかない…
       // 更新した場合も向きがガクガクと入れかわってしまう
       // cone.up.subVectors(cone.position, earth.position);
-      cone.lookAt(this.coneDirection);
-      cone.up.setZ(newZ < 0 ? -1 : 1);
+      // cone.lookAt(this.coneDirection);
+      // cone.up.setZ(newZ < 0 ? -1 : 1);
     }
   }
 
