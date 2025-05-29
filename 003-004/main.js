@@ -157,7 +157,8 @@ class WorldRenderer {
     targetPosition: new THREE.Vector3(0.0, 0.0, 0.0),
   };
   static RENDERER_PARAM = {
-    clearColor: 0x222222,
+    // clearColor: 0x222222,
+    clearColor: 0xdddddd,
     width: window.innerWidth,
     height: window.innerHeight,
   };
