@@ -126,14 +126,14 @@ class MiniMapRenderer {
 
   updateCameraPositionAndRotation() {
     const elapsed = this.clock.getElapsedTime();
-    const theta = elapsed * ThreeApp.CONE_PARAM.speed;
+    const theta = elapsed * ThreeApp.CONE_PARAM.speed + 0.1 * Math.PI;
     const newX = 0.1;
     const newY = Math.cos(theta) * MiniMapRenderer.CAMERA_PARAM.distance;
     const newZ = Math.sin(theta) * MiniMapRenderer.CAMERA_PARAM.distance;
     this.camera.position.set(newX, newY, newZ);
-    // FIXME upを更新していないので反転するが、この更新を入れるとガタガタしてしまう？
-    // this.camera.up.subVectors(this.camera.position, this.cone.position);
+    const up = new THREE.Vector3().subVectors(this.camera.position, this.cone.position).normalize();
     this.camera.lookAt(this.cone.position);
+    this.camera.up.copy(up);
   }
   render() {
     this.renderer.setClearColor(this.clearColor);
@@ -270,8 +270,9 @@ class WorldRenderer {
     const newZ = Math.sin(theta) * WorldRenderer.CAMERA_PARAM.distance;
     this.camera.position.set(newX, newY, newZ);
     // upを更新していないので反転するが、この更新を入れるとガタガタしてしまう
-    // this.camera.up.subVectors(this.camera.position, this.cone.position);
+    const up = new THREE.Vector3().subVectors(this.camera.position, this.cone.position).normalize();
     this.camera.lookAt(this.cone.position);
+    this.camera.up.copy(up);
   }
   render() {
     this.renderer.setClearColor(this.clearColor);
