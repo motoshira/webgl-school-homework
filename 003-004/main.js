@@ -126,12 +126,13 @@ class MiniMapRenderer {
 
   updateCameraPositionAndRotation() {
     const elapsed = this.clock.getElapsedTime();
-    const theta = elapsed * ThreeApp.CONE_PARAM.speed + 0.1 * Math.PI;
+    const theta = elapsed * ThreeApp.CONE_PARAM.speed;
     const newX = 0.1;
     const newY = Math.cos(theta) * MiniMapRenderer.CAMERA_PARAM.distance;
     const newZ = Math.sin(theta) * MiniMapRenderer.CAMERA_PARAM.distance;
     this.camera.position.set(newX, newY, newZ);
-    const up = new THREE.Vector3().subVectors(this.camera.position, this.cone.position).normalize();
+    // 進行方向が画面の上向きになるようにする
+    const up = new THREE.Vector3().subVectors(this.camera.position, this.cone.position).normalize().negate();
     this.camera.lookAt(this.cone.position);
     this.camera.up.copy(up);
   }
