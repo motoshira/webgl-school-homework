@@ -118,7 +118,6 @@ class MiniMapRenderer {
       "resize",
       () => {
         this.width = Math.min(window.innerWidth / 2, window.innerHeight / 2);
-        this.camera.updateProjectionMatrix();
       },
       false,
     );
@@ -279,7 +278,7 @@ class WorldRenderer {
     this.renderer.setClearColor(this.clearColor);
     this.updateCameraPositionAndRotation();
     this.renderer.setRenderTarget(this.renderTarget);
-    // this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.render(this.scene, this.camera);
     this.renderer.setRenderTarget(null);
   }
@@ -294,8 +293,6 @@ class ThreeApp {
   };
   static RENDERER_PARAM = {
     clearColor: 0xffffff,
-    width: window.innerWidth,
-    height: window.innerHeight,
   };
   static EARTH_PARAM = {
     radius: 0.5,
@@ -339,6 +336,53 @@ class ThreeApp {
   miniMapRenderer
   miniMapRenderTarget;
 
+  // 毎回作り直しているのでパフォーマンス的には良くないが
+  // リサイズ頻度は多くないので耐えるはず…
+  initPlanes(width, height) {
+    if (this.worldPlane) {
+      this.scene.remove(this.worldPlane);
+      this.worldPlane.geometry.dispose();
+      this.worldPlane.material.dispose();
+    }
+    if (this.minimapPlane) {
+      this.scene.remove(this.minimapPlane);
+      this.minimapPlane.geometry.dispose();
+      this.minimapPlane.material.dispose();
+    }
+
+    const mapWidth = Math.min(width / 2, height / 2)
+
+    // world
+    const worldPlaneGeometry = new THREE.PlaneGeometry(
+      width,
+      height,
+    )
+    this.worldPlane = new THREE.Mesh(
+      worldPlaneGeometry,
+      new THREE.MeshStandardMaterial({
+        map: this.worldRenderTarget.texture,
+        side: THREE.DoubleSide,
+      }),
+    );
+    this.worldPlane.position.set(0.0, 0.0, 0.0);
+    this.scene.add(this.worldPlane);
+
+    // minimap
+    const _minimapPlaneGeometry = new THREE.PlaneGeometry(
+      mapWidth,
+      mapWidth,
+    )
+    this.minimapPlane = new THREE.Mesh(
+      _minimapPlaneGeometry,
+      new THREE.MeshStandardMaterial({
+        map: this.miniMapRenderTarget.texture,
+        side: THREE.DoubleSide,
+      }),
+    );
+    this.minimapPlane.position.set(width / 2 - mapWidth / 2, -(height / 2 - mapWidth / 2), 1.0);
+    this.scene.add(this.minimapPlane);
+
+  }
 
   async init(wrapper) {
     this.clock = new THREE.Clock({autoStart: true})
@@ -393,35 +437,7 @@ class ThreeApp {
     directionalLight.target.position.set(0.0, 0.0, 0.0);
     this.scene.add(directionalLight);
 
-    // world
-    const worldPlaneGeometry = new THREE.PlaneGeometry(
-      width,
-      height,
-    )
-    this.worldPlane = new THREE.Mesh(
-      worldPlaneGeometry,
-      new THREE.MeshStandardMaterial({
-        map: this.worldRenderTarget.texture,
-        side: THREE.DoubleSide,
-      }),
-    );
-    this.worldPlane.position.set(0.0, 0.0, 0.0);
-    this.scene.add(this.worldPlane);
-
-    // minimap
-    const _minimapPlaneGeometry = new THREE.PlaneGeometry(
-      mapWidth,
-      mapWidth,
-    )
-    this.minimapPlane = new THREE.Mesh(
-      _minimapPlaneGeometry,
-      new THREE.MeshStandardMaterial({
-        map: this.miniMapRenderTarget.texture,
-        side: THREE.DoubleSide,
-      }),
-    );
-    this.minimapPlane.position.set(width / 2 - mapWidth / 2, -(height / 2 - mapWidth / 2), 1.0);
-    this.scene.add(this.minimapPlane);
+    this.initPlanes(width, height);
 
     // this のバインド
     this.render = this.render.bind(this);
@@ -429,10 +445,13 @@ class ThreeApp {
     window.addEventListener(
       "resize",
       () => {
-        this.camera.left = - window.innerWidth / 2;
-        this.camera.right = window.innerWidth / 2;
-        this.camera.top = window.innerHeight / 2;
-        this.camera.bottom = - window.innerHeight / 2;
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        this.initPlanes(width, height);
+        this.camera.left = - width / 2;
+        this.camera.right = width / 2;
+        this.camera.top = height / 2;
+        this.camera.bottom = - height / 2;
         this.camera.updateProjectionMatrix();
       },
       false,
@@ -467,12 +486,12 @@ class ThreeApp {
     this.worldRenderer.render();
     this.miniMapRenderer.render();
 
+    this.renderer.setSize(
+      window.innerWidth,
+      window.innerHeight,
+    );
     this.renderer.setClearColor(this.clearColor);
     this.renderer.setRenderTarget(null);
-    this.renderer.setSize(
-      ThreeApp.RENDERER_PARAM.width,
-      ThreeApp.RENDERER_PARAM.height,
-    );
     this.renderer.render(this.scene, this.camera);
     requestAnimationFrame(this.render);
   }
