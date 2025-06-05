@@ -101,9 +101,12 @@ class MiniMapRenderer {
     const geometry = new THREE.ConeGeometry( radius, coneHeight, 32 );
     const material = new THREE.MeshLambertMaterial( {color: ThreeApp.CONE_PARAM.color} );
     const cone = new THREE.Mesh(geometry, material);
-    cone.position.copy(ThreeApp.CONE_PARAM.position);
-    this.cone = cone;
-    this.scene.add(cone);
+    cone.rotation.x = Math.PI * 0.5;
+    const group = new THREE.Group();
+    group.add(cone);
+    group.position.copy(ThreeApp.CONE_PARAM.position);
+    this.cone = group;
+    this.scene.add(group);
 
     this.cameraDirection.subVectors(this.cone.position, this.camera.position);
     this.camera.lookAt(this.cone.position);
@@ -128,9 +131,10 @@ class MiniMapRenderer {
     const newY = Math.cos(theta) * MiniMapRenderer.CAMERA_PARAM.distance;
     const newZ = Math.sin(theta) * MiniMapRenderer.CAMERA_PARAM.distance;
     this.camera.position.set(newX, newY, newZ);
-    // FIXME upを更新していないので反転するが、この更新を入れるとガタガタしてしまう？
-    // this.camera.up.subVectors(this.camera.position, this.cone.position);
+    // 進行方向が画面の上向きになるようにする
+    const up = new THREE.Vector3().subVectors(this.camera.position, this.cone.position).normalize().negate();
     this.camera.lookAt(this.cone.position);
+    this.camera.up.copy(up);
   }
   render() {
     this.renderer.setClearColor(this.clearColor);
@@ -168,7 +172,7 @@ class WorldRenderer {
   };
   static AMBIENT_LIGHT_PARAM = {
     color: 0xffffff,
-    intensity: 0.3,
+    intensity: 0.5,
   };
 
   // from ctor props
@@ -236,9 +240,12 @@ class WorldRenderer {
     const geometry = new THREE.ConeGeometry( radius, coneHeight, 32 );
     const material = new THREE.MeshLambertMaterial( {color: ThreeApp.CONE_PARAM.color} );
     const cone = new THREE.Mesh(geometry, material);
-    cone.position.copy(ThreeApp.CONE_PARAM.position);
-    this.cone = cone;
-    this.scene.add(cone);
+    cone.rotation.x = Math.PI * 0.5;
+    const group = new THREE.Group();
+    group.add(cone);
+    group.position.copy(ThreeApp.CONE_PARAM.position);
+    this.cone = group;
+    this.scene.add(group);
 
     this.cameraDirection.subVectors(this.cone.position, this.camera.position);
     this.camera.lookAt(this.cone.position);
@@ -264,8 +271,9 @@ class WorldRenderer {
     const newZ = Math.sin(theta) * WorldRenderer.CAMERA_PARAM.distance;
     this.camera.position.set(newX, newY, newZ);
     // upを更新していないので反転するが、この更新を入れるとガタガタしてしまう
-    // this.camera.up.subVectors(this.camera.position, this.cone.position);
+    const up = new THREE.Vector3().subVectors(this.camera.position, this.cone.position).normalize();
     this.camera.lookAt(this.cone.position);
+    this.camera.up.copy(up);
   }
   render() {
     this.renderer.setClearColor(this.clearColor);
@@ -315,6 +323,7 @@ class ThreeApp {
   camera;
   worldPlane;
   minimapPlane;
+  minimapBorderPlane;
 
   coneDirection;
 
@@ -415,6 +424,22 @@ class ThreeApp {
     this.minimapPlane.position.set(width / 2 - mapWidth / 2, -(height / 2 - mapWidth / 2), 1.0);
     this.scene.add(this.minimapPlane);
 
+    const borderWidth = 2;
+
+        const _minimapBorderPlaneGeometry = new THREE.PlaneGeometry(
+          mapWidth + 2,
+          mapWidth + 2,
+        )
+    this.minimapBorderPlane = new THREE.Mesh(
+      _minimapBorderPlaneGeometry,
+      new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        side: THREE.DoubleSide,
+      }),
+    );
+    this.minimapBorderPlane.position.set(width / 2 - mapWidth / 2 - borderWidth  / 2, -(height / 2 - mapWidth / 2 - borderWidth  / 2), 0.9);
+    this.scene.add(this.minimapBorderPlane);
+
     // this のバインド
     this.render = this.render.bind(this);
 
@@ -442,14 +467,15 @@ class ThreeApp {
       const newY = Math.cos(theta) * ThreeApp.CONE_PARAM.distance;
       const newZ = Math.sin(theta) * ThreeApp.CONE_PARAM.distance;
 
-      this.coneDirection.subVectors(cone.position, currentPosition);
-
       cone.position.set(newX, newY, newZ);
-      // FIXME 進行方向と同じ向きにしたいが上手くいかない…
-      cone.lookAt(this.coneDirection);
-      cone.up.setZ(newZ > 0 ? 1 : -1);
-      // これで更新した場合も向きがガクガクと入れかわってしまう
-      // cone.up.subVectors(cone.position, earth.position);
+      this.coneDirection.subVectors(cone.position, currentPosition);
+      this.coneDirection.normalize();
+      // coneの向き先
+      const lookAtPoint = cone.position.clone().add(this.coneDirection);
+      const upVector = cone.position.clone().normalize();
+
+      cone.lookAt(lookAtPoint);
+      cone.up.copy(upVector);
     }
   }
 

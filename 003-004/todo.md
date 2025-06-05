@@ -15,15 +15,17 @@
   - Light
   - Camera
   - Objs
-- [ ] 飛行物体を中心に真上から満た様子をrenderする 0.5pt
+- [x] 飛行物体を中心に真上から満た様子をrenderする 0.5pt
 
 MiniMapRenderer
-- [ ] 右下に表示させる
+- [x] 右下に表示させる
+- [ ] 枠をつける 1pt
 
 WorldRenderer
-- [ ] 既存のThreeAppの代わりに表示
+- [x] 既存のThreeAppの代わりに表示
 
 
 ThreeApp
-- [ ] 2つのplaneを配置
-- [ ] WorldRendererをレンダーする
+- [x] 2つのplaneを配置
+- [x] WorldRendererをレンダーする
+- [ ] リサイズ対応
