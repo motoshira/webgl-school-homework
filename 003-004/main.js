@@ -172,7 +172,7 @@ class WorldRenderer {
   };
   static AMBIENT_LIGHT_PARAM = {
     color: 0xffffff,
-    intensity: 0.3,
+    intensity: 0.5,
   };
 
   // from ctor props
@@ -323,6 +323,7 @@ class ThreeApp {
   camera;
   worldPlane;
   minimapPlane;
+  minimapBorderPlane;
 
   coneDirection;
 
@@ -422,6 +423,22 @@ class ThreeApp {
     );
     this.minimapPlane.position.set(width / 2 - mapWidth / 2, -(height / 2 - mapWidth / 2), 1.0);
     this.scene.add(this.minimapPlane);
+
+    const borderWidth = 2;
+
+        const _minimapBorderPlaneGeometry = new THREE.PlaneGeometry(
+          mapWidth + 2,
+          mapWidth + 2,
+        )
+    this.minimapBorderPlane = new THREE.Mesh(
+      _minimapBorderPlaneGeometry,
+      new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        side: THREE.DoubleSide,
+      }),
+    );
+    this.minimapBorderPlane.position.set(width / 2 - mapWidth / 2 - borderWidth  / 2, -(height / 2 - mapWidth / 2 - borderWidth  / 2), 0.9);
+    this.scene.add(this.minimapBorderPlane);
 
     // this のバインド
     this.render = this.render.bind(this);
