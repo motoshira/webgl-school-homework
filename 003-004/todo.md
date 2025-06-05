@@ -19,7 +19,7 @@
 
 MiniMapRenderer
 - [x] 右下に表示させる
-- [ ] 枠をつける
+- [ ] 枠をつける 1pt
 
 WorldRenderer
 - [x] 既存のThreeAppの代わりに表示
